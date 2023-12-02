@@ -1,68 +1,37 @@
 {
-    "greeting": "Добрый вечер",
-    "cards": "Ошибка!",
-    "top_transactions": [
-        {
-            "date": "02.05.2020",
-            "amount": 9564.76,
-            "category": "Другое",
-            "description": "ГУП ВЦКП ЖХ"
-        },
-        {
-            "date": "05.05.2020",
-            "amount": 5000.0,
-            "category": "Пополнения",
-            "description": "Перевод с карты"
-        },
-        {
-            "date": "02.05.2020",
-            "amount": 2155.05,
-            "category": "ЖКХ",
-            "description": "ЖКУ Дом"
-        },
-        {
-            "date": "02.05.2020",
-            "amount": 2140.73,
-            "category": "ЖКХ",
-            "description": "ЖКУ Дом"
-        },
-        {
-            "date": "18.05.2020",
-            "amount": 815.0,
-            "category": "Книги",
-            "description": "Буквоед"
-        }
-    ],
+    "greeting": "Добрый день",
+    "cards": [],
+    "top_transactions": [],
     "currency_rates": [
         {
             "currency": "USD",
-            "rate": 89.98
+            "rate": 91.23
         },
         {
             "currency": "EUR",
-            "rate": 98.0
+            "rate": 99.31
         }
     ],
     "stock_prices": [
         {
             "stock": "AAPL",
-            "price": 188.6481
+            "price": 191.24
         },
         {
             "stock": "AMZN",
-            "price": 145.35
+            "price": 147.03
         },
         {
             "stock": "GOOGL",
-            "price": 131.7768
+            "price": 131.86
         },
         {
             "stock": "MSFT",
-            "price": 376.75
+            "price": 374.51
         },
         {
             "stock": "TSLA",
-            "price": 241.0352
+            "price": 238.83
         }
     ]
 }
