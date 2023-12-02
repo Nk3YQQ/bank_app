@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from datetime import datetime
 from typing import Any, Hashable
@@ -12,6 +13,8 @@ load_dotenv()
 CURRENCY_API_KEY = os.getenv("CURRENCY_API_KEY")
 STOCKS_API_KEY = os.getenv("STOCKS_API_KEY")
 
+logger = logging.getLogger(__name__)
+
 
 def open_file_with_transactions(date: str, filepath: str = "../data/operations.xls") -> pd.DataFrame:
     """
@@ -24,6 +27,7 @@ def open_file_with_transactions(date: str, filepath: str = "../data/operations.x
     sorted_transactions_by_date = transactions.loc[
         (transactions["Дата платежа"] <= date) & (transactions["Дата платежа"] >= start_date)
     ]
+    logger.info("open_file_with_transactions is working. Status: ok")
     return sorted_transactions_by_date
 
 
@@ -33,12 +37,16 @@ def determine_the_interval_of_day() -> str:
     """
     time = datetime.now().strftime("%H:%M:%S")
     if 5 <= int(time[0:2]) < 11:
+        logger.info("determine_the_interval_of_day is working. Status: ok")
         return "утро"
     elif 11 <= int(time[0:2]) < 17:
+        logger.info("determine_the_interval_of_day is working. Status: ok")
         return "день"
     elif 17 <= int(time[0:2]) < 23:
+        logger.info("determine_the_interval_of_day is working. Status: ok")
         return "вечер"
     else:
+        logger.info("determine_the_interval_of_day is working. Status: ok")
         return "ночь"
 
 
@@ -47,6 +55,7 @@ def open_user_settings(filepath: str = "../user_settings.json") -> Any:
     Функция открывает и читает файл, содержащий пользовательские настройки
     """
     with open(filepath, "r", encoding="utf-8") as file:
+        logger.info("open_user_settings is working. Status: ok")
         return json.load(file)
 
 
@@ -55,6 +64,7 @@ def get_info_about_currency(user_settings: Any) -> Any:
     Функция возвращает список с курсами доллар/рубль, евро/рубль и юань/рубль
     """
     if CURRENCY_API_KEY is None:
+        logger.error("open_user_settings error. Empty API")
         return "Ошибка. Пустой API"
     got_currencies: list = []
     currencies = user_settings["user_currencies"]
@@ -64,6 +74,7 @@ def get_info_about_currency(user_settings: Any) -> Any:
         response_data = json.loads(response.content)
         got_currency = {"currency": currency, "rate": round(response_data["rates"]["RUB"], 2)}
         got_currencies.append(got_currency)
+        logger.info("get_info_about_currency is working. Status: ok")
     return got_currencies
 
 
@@ -83,6 +94,7 @@ def get_info_about_top_transactions(transactions: pd.DataFrame) -> list[dict]:
         top_transactions.append(top_transaction)
         if len(top_transactions) == 5:
             break
+    logger.info("get_info_about_top_transactions is working. Status: ok")
     return top_transactions
 
 
@@ -91,6 +103,7 @@ def get_info_about_stocks(user_settings: Any) -> list[dict] | Any:
     Функция возвращает словарь с пятью рандомными компаниями с указанной ценой
     """
     if STOCKS_API_KEY is None:
+        logger.error("get_info_about_stocks error. Empty API")
         return "Ошибка. Пустой API"
     got_stocks: list = []
     user_stocks = user_settings["user_stocks"]
@@ -100,6 +113,7 @@ def get_info_about_stocks(user_settings: Any) -> list[dict] | Any:
         response_data = json.loads(response.content)
         got_stock = {"stock": stock, "price": response_data["c"]}
         got_stocks.append(got_stock)
+    logger.info("get_info_about_stocks is working. Status: ok")
     return got_stocks
 
 
@@ -112,6 +126,7 @@ def claim_cards_info(transactions: pd.DataFrame) -> list[dict] | Any:
     sorted_by_card_and_total_spent = cards_grouped.agg({"Сумма операции с округлением": "sum", "Кэшбэк": "sum"})
     for card_number, row in sorted_by_card_and_total_spent.iterrows():
         if isinstance(card_number, Hashable):
+            logger.error("claim_cards_info error. Hashable")
             return "Ошибка!"
         reformat_card_number = card_number[1:5]
         total_spent = row["Сумма операции с округлением"]
@@ -122,4 +137,5 @@ def claim_cards_info(transactions: pd.DataFrame) -> list[dict] | Any:
             "cashback": round(float(cashback), 2),
         }
         cards_info.append(card_info)
+    logger.info("claim_cards_info is working. Status: ok")
     return cards_info
