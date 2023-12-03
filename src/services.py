@@ -30,6 +30,8 @@ def search_the_transaction(search_text: str | Any, transactions: pd.DataFrame) -
         ].to_dict(orient="records")
 
         logger.info("search_the_transaction is working. Status: ok")
+        if not found_transactions:
+            return 'Такая категория не найдена'
         return json.dumps(found_transactions, ensure_ascii=False)
 
     except (ValueError, AttributeError, TypeError) as e:
