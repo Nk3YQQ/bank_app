@@ -26,7 +26,7 @@ def open_file_with_transactions(date: str, filepath: str = "../data/operations.x
     start_date = pd.to_datetime(f"01.{format_date.month}.{format_date.year}", format="%d.%m.%Y")
     sorted_transactions_by_date = transactions.loc[
         (transactions["Дата платежа"] <= date) & (transactions["Дата платежа"] >= start_date)
-    ]
+        ]
     logger.info("open_file_with_transactions is working. Status: ok")
     return sorted_transactions_by_date
 
@@ -63,19 +63,23 @@ def get_info_about_currency(user_settings: Any) -> Any:
     """
     Функция возвращает список с курсами доллар/рубль, евро/рубль и юань/рубль
     """
-    if CURRENCY_API_KEY is None:
-        logger.error("open_user_settings error. Empty API")
-        return "Ошибка. Пустой API"
-    got_currencies: list = []
-    currencies = user_settings["user_currencies"]
-    for currency in currencies:
-        url = f"https://api.apilayer.com/exchangerates_data/latest?base={currency}"
-        response = requests.get(url, headers={"apikey": CURRENCY_API_KEY})
-        response_data = json.loads(response.content)
-        got_currency = {"currency": currency, "rate": round(response_data["rates"]["RUB"], 2)}
-        got_currencies.append(got_currency)
-        logger.info("get_info_about_currency is working. Status: ok")
-    return got_currencies
+    try:
+        if CURRENCY_API_KEY is None:
+            logger.error("open_user_settings error. Empty API")
+            return "Ошибка. Пустой API"
+        got_currencies: list = []
+        currencies = user_settings["user_currencies"]
+        for currency in currencies:
+            url = f"https://api.apilayer.com/exchangerates_data/latest?base={currency}"
+            response = requests.get(url, headers={"apikey": CURRENCY_API_KEY})
+            response_data = json.loads(response.content)
+            got_currency = {"currency": currency, "rate": round(response_data["rates"]["RUB"], 2)}
+            got_currencies.append(got_currency)
+            logger.info("get_info_about_currency is working. Status: ok")
+        return got_currencies
+    except KeyError:
+        logger.error("get_info_about_currency error. API key has down")
+        return 'Ошибка со стороны программы. Мы быстрее бежим её чинить'
 
 
 def get_info_about_top_transactions(transactions: pd.DataFrame) -> list[dict]:
@@ -126,16 +130,15 @@ def claim_cards_info(transactions: pd.DataFrame) -> list[dict] | Any:
     sorted_by_card_and_total_spent = cards_grouped.agg({"Сумма операции с округлением": "sum", "Кэшбэк": "sum"})
     for card_number, row in sorted_by_card_and_total_spent.iterrows():
         if isinstance(card_number, Hashable):
-            logger.error("claim_cards_info error. Hashable")
-            return "Ошибка!"
-        reformat_card_number = card_number[1:5]
-        total_spent = row["Сумма операции с округлением"]
-        cashback = row["Кэшбэк"]
-        card_info = {
-            "last_digits": reformat_card_number,
-            "total_spent": round(float(total_spent), 2),
-            "cashback": round(float(cashback), 2),
-        }
-        cards_info.append(card_info)
-    logger.info("claim_cards_info is working. Status: ok")
-    return cards_info
+            total_spent = row["Сумма операции с округлением"]
+            cashback = row["Кэшбэк"]
+            card_info = {
+                "last_digits": str(card_number)[1:5],
+                "total_spent": round(float(total_spent), 2),
+                "cashback": round(float(cashback), 2),
+            }
+            cards_info.append(card_info)
+        logger.info("claim_cards_info is working. Status: ok")
+        return cards_info
+    logger.error("claim_cards_info error. Hashable")
+    return "Ошибка!"
