@@ -1,18 +1,11 @@
 import json
 import logging
-import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Hashable
 
 import pandas as pd
 import requests
-from dotenv import load_dotenv
-
-load_dotenv()
-
-CURRENCY_API_KEY = os.getenv("CURRENCY_API_KEY")
-STOCKS_API_KEY = os.getenv("STOCKS_API_KEY")
 
 logger = logging.getLogger(__name__)
 
@@ -34,11 +27,12 @@ def open_file_with_transactions(filepath: Path, date: str | None = None) -> pd.D
     return sorted_transactions_by_date
 
 
-def determine_the_interval_of_day() -> str:
+def determine_the_interval_of_day(time: str | None = None) -> str:
     """
     Функция определяет какое сейчас время и возвращает промежуток дня: утро, день, вечер или ночь
     """
-    time = datetime.now().strftime("%H:%M:%S")
+    if not time:
+        time = datetime.now().strftime("%H:%M:%S")
     if 5 <= int(time[0:2]) < 11:
         logger.info("determine_the_interval_of_day is working. Status: ok")
         return "утро"
@@ -62,25 +56,25 @@ def open_user_settings(filepath: Path) -> Any:
         return json.load(file)
 
 
-def get_info_about_currency(user_settings: Any) -> Any:
+def get_info_about_currency(user_settings: Any, api_key: str | None = None) -> Any:
     """
     Функция возвращает список с курсами доллар/рубль, евро/рубль и юань/рубль
     """
     try:
-        if CURRENCY_API_KEY is None:
+        if api_key is None:
             logger.error("open_user_settings error. Empty API")
             return "Ошибка. Пустой API"
         got_currencies: list = []
         currencies = user_settings["user_currencies"]
         for currency in currencies:
             url = f"https://api.apilayer.com/exchangerates_data/latest?base={currency}"
-            response = requests.get(url, headers={"apikey": CURRENCY_API_KEY})
+            response = requests.get(url, headers={"apikey": api_key})
             response_data = json.loads(response.content)
             got_currency = {"currency": currency, "rate": round(response_data["rates"]["RUB"], 2)}
             got_currencies.append(got_currency)
             logger.info("get_info_about_currency is working. Status: ok")
         return got_currencies
-    except KeyError:
+    except (KeyError, UnicodeEncodeError):
         logger.error("get_info_about_currency error. API key has down")
         return "Ошибка со стороны программы. Мы быстрее бежим её чинить"
 
@@ -105,17 +99,17 @@ def get_info_about_top_transactions(transactions: pd.DataFrame) -> list[dict]:
     return top_transactions
 
 
-def get_info_about_stocks(user_settings: Any) -> list[dict] | Any:
+def get_info_about_stocks(user_settings: Any, api_key: str | None = None) -> list[dict] | Any:
     """
     Функция возвращает словарь с пятью рандомными компаниями с указанной ценой
     """
-    if STOCKS_API_KEY is None:
+    if api_key is None:
         logger.error("get_info_about_stocks error. Empty API")
         return "Ошибка. Пустой API"
     got_stocks: list = []
     user_stocks = user_settings["user_stocks"]
     for stock in user_stocks:
-        url = f"https://finnhub.io/api/v1/quote?symbol={stock}&token={STOCKS_API_KEY}"
+        url = f"https://finnhub.io/api/v1/quote?symbol={stock}&token={api_key}"
         response = requests.get(url)
         response_data = json.loads(response.content)
         got_stock = {"stock": stock, "price": response_data["c"]}
@@ -144,4 +138,4 @@ def claim_cards_info(transactions: pd.DataFrame) -> list[dict] | Any:
         logger.info("claim_cards_info is working. Status: ok")
         return cards_info
     logger.error("claim_cards_info error. Hashable")
-    return "Ошибка!"
+    return []
