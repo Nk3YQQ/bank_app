@@ -8,14 +8,6 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-def open_file_with_all_transactions(filepath: str = "../data/operations.xls") -> pd.DataFrame:
-    """
-    Функция возвращает полный список всех транзакций
-    """
-    logger.info("open_file_with_all_transactions is working. Status: ok")
-    return pd.read_excel(filepath)
-
-
 def search_the_transaction(search_text: str | Any, transactions: pd.DataFrame) -> str:
     """
     Функция принимает строку поиска и возвращает вск транзакции,
@@ -31,7 +23,7 @@ def search_the_transaction(search_text: str | Any, transactions: pd.DataFrame) -
 
         logger.info("search_the_transaction is working. Status: ok")
         if not found_transactions:
-            return 'Такая категория не найдена'
+            return "[]"
         return json.dumps(found_transactions, ensure_ascii=False)
 
     except (ValueError, AttributeError, TypeError) as e:

@@ -1,13 +1,16 @@
 import pandas as pd
 import pytest
 
+from config import TRANSACTIONS_PATH
 from src.reports import spending_by_category
-from src.services import open_file_with_all_transactions
+from src.utils import open_file_with_transactions
+
+transactions_path = TRANSACTIONS_PATH
 
 
 @pytest.fixture
 def transactions() -> pd.DataFrame:
-    return open_file_with_all_transactions("data/operations.xls")
+    return open_file_with_transactions(transactions_path)
 
 
 @pytest.mark.parametrize(

@@ -3,17 +3,17 @@ import json
 import pandas as pd
 import pytest
 
-from src.services import open_file_with_all_transactions, search_the_transaction, search_transactions_to_people
+from config import TRANSACTIONS_PATH, USER_SETTINGS_PATH
+from src.services import search_the_transaction, search_transactions_to_people
+from src.utils import open_file_with_transactions
 
-
-def test_open_file_with_all_transactions() -> None:
-    list_of_transactions = open_file_with_all_transactions("data/operations.xls")
-    assert len(list_of_transactions) == 6705
+transactions_path = TRANSACTIONS_PATH
+user_settings_path = USER_SETTINGS_PATH
 
 
 @pytest.fixture
 def transactions() -> pd.DataFrame:
-    return open_file_with_all_transactions("data/operations.xls")
+    return open_file_with_transactions(transactions_path)
 
 
 def test_search_the_transaction(transactions: pd.DataFrame) -> None:

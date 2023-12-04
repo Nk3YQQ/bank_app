@@ -1,6 +1,10 @@
 import logging
 from logging import Logger
 
+from config import LOGGER_PATH
+
+logger_path = LOGGER_PATH
+
 
 def setup_logger() -> Logger:
     """
@@ -9,7 +13,7 @@ def setup_logger() -> Logger:
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s: %(message)s",
-        filename="../data/mylogs.log",
+        filename=logger_path,
         filemode="w",
     )
     return logging.getLogger()

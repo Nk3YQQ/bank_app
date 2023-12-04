@@ -1,14 +1,19 @@
 import json
 import logging
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Callable, Optional
 
 import pandas as pd
 
+from config import WRITER_PATH
+
 logger = logging.getLogger(__name__)
 
+writer_path = WRITER_PATH
 
-def writing_to_file(filepath: str = "../data/transactions.json") -> Callable[..., Any]:
+
+def writing_to_file(filepath: Path) -> Callable[..., Any]:
     """
     Декоратор записывает полученные данные из функции в файл-отчёт в формате json
     """
@@ -17,7 +22,7 @@ def writing_to_file(filepath: str = "../data/transactions.json") -> Callable[...
         def inner(*args: Any, **kwargs: Any) -> Any:
             result = function(*args, **kwargs)
             if isinstance(result, str):
-                logger.error(f"writing_to_file error: got str, not dataframe")
+                logger.error("writing_to_file error: got str, not dataframe")
                 return result
             list_of_transactions = []
             for _, transaction in result.iterrows():
@@ -38,8 +43,7 @@ def writing_to_file(filepath: str = "../data/transactions.json") -> Callable[...
     return decorator
 
 
-# Если необходимо протестировать функцию с помощью Pytest, то замените значение filepath на 'data/transactions.json'
-@writing_to_file("../data/transactions.json")
+@writing_to_file(writer_path)
 def spending_by_category(
     transactions: pd.DataFrame, category_name: str, date: Optional[str] = None
 ) -> pd.DataFrame | str:
@@ -56,7 +60,7 @@ def spending_by_category(
         (sorted_transactions["Дата платежа"] <= date) & (sorted_transactions["Дата платежа"] >= start_date)
     ]
     if len(sorted_transactions) == 0:
-        logger.error(f"spending_by_category: no such date in file")
+        logger.error("spending_by_category: no such date in file")
         return "По заданному параметру не было найдено не одной транзакции."
     logger.info("spending_by_category is working. Status: ok")
     return sorted_transactions_by_date
