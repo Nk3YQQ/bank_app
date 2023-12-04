@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Hashable
 
 import pandas as pd
@@ -16,17 +17,19 @@ STOCKS_API_KEY = os.getenv("STOCKS_API_KEY")
 logger = logging.getLogger(__name__)
 
 
-def open_file_with_transactions(date: str, filepath: str = "../data/operations.xls") -> pd.DataFrame:
+def open_file_with_transactions(filepath: Path, date: str | None = None) -> pd.DataFrame:
     """
     Функция читает файл и возвращает список, в котором хранятся транзакции
     """
     transactions = pd.read_excel(filepath)
+    if date is None:
+        return transactions
     transactions["Дата платежа"] = pd.to_datetime(transactions["Дата платежа"], format="%d.%m.%Y")
     format_date = pd.to_datetime(date, format="%d.%m.%Y")
     start_date = pd.to_datetime(f"01.{format_date.month}.{format_date.year}", format="%d.%m.%Y")
     sorted_transactions_by_date = transactions.loc[
         (transactions["Дата платежа"] <= date) & (transactions["Дата платежа"] >= start_date)
-        ]
+    ]
     logger.info("open_file_with_transactions is working. Status: ok")
     return sorted_transactions_by_date
 
@@ -50,7 +53,7 @@ def determine_the_interval_of_day() -> str:
         return "ночь"
 
 
-def open_user_settings(filepath: str = "../user_settings.json") -> Any:
+def open_user_settings(filepath: Path) -> Any:
     """
     Функция открывает и читает файл, содержащий пользовательские настройки
     """
@@ -79,7 +82,7 @@ def get_info_about_currency(user_settings: Any) -> Any:
         return got_currencies
     except KeyError:
         logger.error("get_info_about_currency error. API key has down")
-        return 'Ошибка со стороны программы. Мы быстрее бежим её чинить'
+        return "Ошибка со стороны программы. Мы быстрее бежим её чинить"
 
 
 def get_info_about_top_transactions(transactions: pd.DataFrame) -> list[dict]:
