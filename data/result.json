@@ -1,15 +1,15 @@
 {
     "greeting": "Добрый день",
-    "cards": "Ошибка!",
+    "cards": [],
     "top_transactions": [],
     "currency_rates": [
         {
             "currency": "USD",
-            "rate": 90.81
+            "rate": 90.92
         },
         {
             "currency": "EUR",
-            "rate": 98.66
+            "rate": 98.86
         }
     ],
     "stock_prices": [
